@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+</h:head>
+<h:body>
+	<h:form id="forms">
+		<p:panel header="-İşlemler-" id="basic" style="margin-bottom:20px">
+			<p:panelGrid id="grid" columns="2" cellpadding="1">
+				<h:outputText value="Ad : " ></h:outputText>
+				<p:inputText  value="#{kisiController.name}" />
+				<h:outputText value="TC Kimlik No : " />
+				<p:inputMask id="tck" value="#{kisiController.identification}" mask="99999999999"></p:inputMask>
+
+				<p:commandButton id="ara" value="Kayıtbul" action="#{kisiController.ara()}" update="datatable"></p:commandButton>			
+				
+				<p:commandButton id="ekle" value="Kayıt Ekle" action="#{kisiController.yeniKayit()}" oncomplete="PF('dlg1').show()" update="panel :forms:kisiDialog"></p:commandButton>
+			
+			</p:panelGrid>
+		</p:panel>
+		
+		<p:dataTable id="datatable" value="#{kisiController.liste}"  widgetVar="dlg" var="kisi" width="1200">
+	
+				<p:column headerText="ad" sortBy="#{kisi.name}">					         
+					<h:outputText value="#{kisi.name}" />                  		               
+				</p:column>
+				<p:column headerText="soyad" sortBy="#{kisi.surname}">					                   
+	            	<h:outputText value="#{kisi.surname}" />                                     					
+				</p:column>
+				<p:column headerText="tckimlikno" sortBy="#{kisi.identification}">					                   
+	            	<h:outputText value="#{kisi.identification}" />                   				
+				</p:column>
+				<p:column headerText="dogumtarihi" sortBy="#{kisi.birthday}">					                    
+	            	<h:outputText value="#{kisi.birthday}" />	                                      					
+				</p:column>
+				<p:column headerText="epostaadresi" sortBy="#{kisi.email}">						                    
+	            	<h:outputText value="#{kisi.email}" />	                  					
+				</p:column>
+				<p:column headerText="ceptelefonuno" sortBy="#{kisi.phonenumber}">						                   
+	            	<h:outputText value="#{kisi.phonenumber}" />	                   				
+				</p:column>			
+				<p:column headerText="il" sortBy="#{kisi.city}">			                   	
+	                <h:outputText value="#{kisi.city}" />	                   			
+				</p:column>			
+				<p:column headerText="ilce" sortBy="#{kisi.state}">						                  
+	            	<h:outputText value="#{kisi.state}" />	                    
+				</p:column>	
+				
+				<p:column>
+					<p:commandButton id="detay" value="Detay" action="#{kisiController.veriCek(true, false)}" oncomplete="PF('dlg1').show()" update=":forms:kisiDialog">
+						<f:setPropertyActionListener value="#{kisi}" target="#{kisiController.userBilgi}" />
+					</p:commandButton>	
+				</p:column>
+			
+				<p:column>
+					<p:commandButton id="sil" value="Kayıt Sil" action="#{kisiController.sil(kisi)}" update="datatable">
+						<f:setPropertyActionListener value="#{kisi}" target="#{kisiController.userBilgi}" />	
+					</p:commandButton>
+						
+				</p:column>	
+				
+				<p:column>
+					<p:commandButton id="guncelle" value="Düzenle" action="#{kisiController.veriCek(false, true)}" oncomplete="PF('dlg1').show()" update=":forms:kisiDialog" >
+						<f:setPropertyActionListener value="#{kisi}" target="#{kisiController.userBilgi}" />
+					</p:commandButton>
+				</p:column>
+		</p:dataTable>
+		
+		
+		
+<p:dialog widgetVar="dlg1" header="#{kisiController.addOperation ?'Kişi Ekle' : 'Kişi Güncelle'}"  width="500" height="320" id="kisiDialog" update="datatable">
+	<h:panelGrid id="panel" columns="2" cellpadding="1">
+		<h:outputText value="Ad:" />
+		<p:inputText id="ad" value="#{kisiController.userBilgi.name}" readonly="#{kisiController.disable ?'true':'false'}"/>
+		<h:outputText value="Soyad:" /> 
+		<p:inputText id="soyad" value="#{kisiController.userBilgi.surname}" readonly="#{kisiController.disable ?'true':'false'}"/>
+		<h:outputText for="tc" value="T.C. Kimlik no:" /> 
+		<p:inputMask id="tc" value="#{kisiController.userBilgi.identification}"  mask="99999999999" readonly="#{kisiController.disable ?'true':'false'}"/>
+		<h:outputText for="tarih" value="Doğum Tarihi:"/>
+		<p:inputMask id="tarih" value="#{kisiController.userBilgi.birthday}" mask="99/99/9999" readonly="#{kisiController.disable ?'true':'false'}"/>
+		<h:outputText value="E-posta:"/>
+		<p:inputText id="mail" value="#{kisiController.userBilgi.email}" readonly="#{kisiController.disable ?'true':'false'}">
+		<f:validateRegex pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$" /></p:inputText>
+		<h:outputText value="Cep Telefonu:"/> 
+		<p:inputMask id="phone" value="#{kisiController.userBilgi.phonenumber}" mask="0(999) 999-99-99" readonly="#{kisiController.disable ?'true':'false'}"/>
+		<h:outputLabel for="il" value="İl:" />
+		<p:selectOneMenu id="il" value="#{kisiController.userBilgi.city}" >
+			<p:ajax partialSubmit="true" process="@this" listener="#{kisiController.ilSec()}" update="ilce" />
+			<f:selectItem itemLabel="İl Seçiniz" itemValue="" noSelectionOption="true" readonly="#{kisiController.disable ?'true':'false'}"/>
+			<f:selectItems value="#{kisiController.iller}" />
+		</p:selectOneMenu>
+		<p:outputLabel for="ilce" value="İlçe:" />
+		<p:selectOneMenu id="ilce" value="#{kisiController.userBilgi.state}" >		
+			<f:selectItem itemLabel="İlçe Seçiniz" itemValue="" noSelectionOption="true" readonly="#{kisiController.disable ?'true':'false'}"/>
+			<f:selectItems value="#{kisiController.ilceler}" />
+		</p:selectOneMenu>
+		<p:commandButton id="kisiKaydet" value="#{kisiController.addOperation ?'Kaydet':'Güncelle'}" rendered="#{kisiController.visible ?'true':'false'}" action="#{kisiController.commit()}" update=":forms:kisiDialog panel datatable">
+			
+			<p:ajax render="kisiKaydet"></p:ajax>
+		</p:commandButton>
+	</h:panelGrid>					
+</p:dialog>						
+		
+		
+			
+		
+	</h:form>	
+</h:body>
+</html>
